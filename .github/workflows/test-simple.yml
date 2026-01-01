@@ -1,0 +1,59 @@
+name: Simple Build Test
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-backend:
+    name: Test Single Backend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Build authentification service
+      working-directory: ./authentification
+      run: |
+        echo "Building authentification service..."
+        mvn clean compile -DskipTests
+        echo "Build completed!"
+  
+  test-frontend:
+    name: Test Frontend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Check package.json
+      working-directory: ./frontend
+      run: |
+        echo "Checking if package.json exists..."
+        ls -la
+        cat package.json
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: |
+        echo "Installing dependencies..."
+        npm install
+        echo "Dependencies installed!"
+    
+    - name: List installed packages
+      working-directory: ./frontend
+      run: |
+        echo "Checking if Angular CLI is available..."
+        npx ng version || echo "Angular CLI not found in node_modules"
