@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: irrigation-config
+  namespace: irrigation-system
+data:
+  spring.cloud.config.uri: "http://config-server:8071"
+  spring.rabbitmq.host: "rabbitmq"
+  spring.rabbitmq.port: "5672"
+  spring.datasource.url: "jdbc:mysql://mysql:3306/irrigation_db?serverTimezone=UTC&createDatabaseIfNotExist=true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: meteo-config
+  namespace: irrigation-system
+data:
+  application.yml: |
+    spring:
+      application:
+        name: ms-meteo
+      datasource:
+        url: jdbc:mysql://mysql:3306/meteo_db?serverTimezone=UTC&createDatabaseIfNotExist=true
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: false
+      rabbitmq:
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+    eureka:
+      client:
+        serviceUrl:
+          defaultZone: http://eureka-server:8070/eureka/
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arrosage-config
+  namespace: irrigation-system
+data:
+  application.yml: |
+    spring:
+      application:
+        name: ms-arrosage
+      datasource:
+        url: jdbc:mysql://mysql:3306/arrosage_db?serverTimezone=UTC&createDatabaseIfNotExist=true
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: false
+      rabbitmq:
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+    eureka:
+      client:
+        serviceUrl:
+          defaultZone: http://eureka-server:8070/eureka/

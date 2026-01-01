@@ -1,0 +1,14 @@
+{
+  "/api/meteo": {
+    "target": "http://localhost:8081",
+    "secure": false
+  },
+  "/api/arrosage": {
+    "target": "http://localhost:8082",
+    "secure": false
+  },
+  "/api/auth": {
+    "target": "http://localhost:8085",
+    "secure": false
+  }
+}

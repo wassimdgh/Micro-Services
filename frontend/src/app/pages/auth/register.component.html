@@ -1,0 +1,53 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Register</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" type="text" placeholder="Enter username (min 3 chars)">
+          <mat-error *ngIf="form.get('username')?.hasError('required')">Username is required</mat-error>
+          <mat-error *ngIf="form.get('username')?.hasError('minlength')">Username must be at least 3 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" placeholder="Enter password (min 6 chars)">
+          <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('minlength')">Password must be at least 6 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm password">
+          <mat-error *ngIf="form.hasError('passwordMismatch')">Passwords do not match</mat-error>
+          <mat-error *ngIf="form.get('confirmPassword')?.hasError('required')">Confirm password is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="roles">
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role === 'ROLE_ADMIN' ? 'Administrator' : 'User' }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select user role (default: User)</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading || !form.valid">
+            <span *ngIf="!loading">Register Account</span>
+            <span *ngIf="loading">Registering...</span>
+          </button>
+        </div>
+
+        <div class="login-link">
+          <p>Already have an account? <a (click)="goToLogin()">Login here</a></p>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

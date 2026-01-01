@@ -1,0 +1,95 @@
+<div class="settings-container">
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Account Settings</mat-card-title>
+    </mat-card-header>
+
+    <mat-tab-group>
+      <!-- Account Information Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-icon">👤</span>
+          <span>Account Info</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="info-section">
+            <h3>Your Account Information</h3>
+            <mat-divider></mat-divider>
+
+            <div class="info-item" *ngIf="currentUser">
+              <label>Username:</label>
+              <span class="value">{{ currentUser.username }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Account Type:</label>
+              <span class="value">Standard User</span>
+            </div>
+
+            <div class="info-item">
+              <label>Status:</label>
+              <span class="value">
+                <span class="status-badge active">✓ Active</span>
+              </span>
+            </div>
+
+            <div class="info-item">
+              <label>Last Login:</label>
+              <span class="value">Today</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button mat-raised-button color="primary" (click)="goBack()">
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Change Password Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-icon">🔐</span>
+          <span>Change Password</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <h3>Update Your Password</h3>
+            <mat-divider></mat-divider>
+
+            <mat-form-field class="full-width">
+              <mat-label>Current Password</mat-label>
+              <input matInput formControlName="currentPassword" type="password" placeholder="Enter current password">
+              <mat-error>Password is required (min 6 characters)</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="full-width">
+              <mat-label>New Password</mat-label>
+              <input matInput formControlName="newPassword" type="password" placeholder="Enter new password">
+              <mat-error>Password is required (min 6 characters)</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="full-width">
+              <mat-label>Confirm New Password</mat-label>
+              <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm new password">
+              <mat-error *ngIf="passwordForm.hasError('passwordMismatch')">Passwords do not match</mat-error>
+              <mat-error *ngIf="!passwordForm.hasError('passwordMismatch')">Confirm password is required</mat-error>
+            </mat-form-field>
+
+            <div class="actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="loading || !passwordForm.valid">
+                {{ loading ? 'Updating...' : 'Change Password' }}
+              </button>
+              <button mat-button type="button" (click)="passwordForm.reset()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

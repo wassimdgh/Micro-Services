@@ -1,0 +1,68 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <button mat-icon-button (click)="toggleSidenav()" class="sidenav-toggle">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="app-title">{{ title }}</span>
+  <span class="spacer"></span>
+  
+  <div class="user-info" *ngIf="currentUser">
+    <span class="username">👤 {{ currentUser.username }}</span>
+  </div>
+  
+  <button mat-icon-button [matMenuTriggerFor]="menu" class="account-btn" title="Account">
+    <span style="font-size: 20px;">👤</span>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container" *ngIf="currentUser; else notLoggedIn">
+  <mat-sidenav #sidenav [opened]="sidenavOpened" mode="side" class="sidenav">
+    <mat-nav-list>
+      <h2 mat-subheader>Weather Service</h2>
+      <mat-list-item routerLink="/weather/stations" routerLinkActive="active">
+        <span class="nav-icon">🌍</span>
+        <span matListItemTitle>Weather Stations</span>
+      </mat-list-item>
+      <mat-list-item routerLink="/weather/forecasts" routerLinkActive="active">
+        <span class="nav-icon">⛅</span>
+        <span matListItemTitle>Forecasts</span>
+      </mat-list-item>
+
+      <h2 mat-subheader>Irrigation Service</h2>
+      <mat-list-item routerLink="/irrigation/schedules" routerLinkActive="active">
+        <span class="nav-icon">⏱️</span>
+        <span matListItemTitle>Schedules</span>
+      </mat-list-item>
+      <mat-list-item routerLink="/irrigation/logs" routerLinkActive="active">
+        <span class="nav-icon">📋</span>
+        <span matListItemTitle>Execution Logs</span>
+      </mat-list-item>
+
+      <h2 mat-subheader>System</h2>
+      <mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <span class="nav-icon">📊</span>
+        <span matListItemTitle>Dashboard</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<ng-template #notLoggedIn>
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+</ng-template>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item routerLink="/settings">
+    <span class="menu-icon">⚙️</span>
+    <span>Settings</span>
+  </button>
+  <button mat-menu-item (click)="logout()">
+    <span class="menu-icon">🚪</span>
+    <span>Logout</span>
+  </button>
+</mat-menu>

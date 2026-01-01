@@ -1,0 +1,149 @@
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  padding: 0 16px !important;
+  display: flex;
+  align-items: center;
+}
+
+.app-title {
+  margin-left: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+
+  .username {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.account-btn {
+  color: white !important;
+}
+
+.sidenav-toggle {
+  color: white !important;
+  
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.sidenav-container {
+  height: calc(100vh - 64px);
+  background: var(--gray-50);
+}
+
+.sidenav {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--gray-200);
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
+
+  h2 {
+    padding: 16px 16px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin: 20px 0 8px;
+    border-top: 1px solid var(--gray-100);
+    letter-spacing: 0.8px;
+
+    &:first-of-type {
+      border-top: none;
+      margin-top: 8px;
+    }
+  }
+
+  mat-list-item {
+    margin: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+      margin-right: 12px;
+      display: inline-flex;
+      align-items: center;
+      min-width: 28px;
+    }
+
+    &:hover {
+      background-color: var(--gray-50);
+    }
+
+    &.active {
+      background-color: rgba(37, 99, 235, 0.1) !important;
+      color: var(--primary-color) !important;
+
+      .nav-icon {
+        color: var(--primary-color) !important;
+      }
+
+      span {
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.main-content {
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--gray-50);
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+::ng-deep {
+  .mat-toolbar {
+    height: 64px !important;
+    line-height: 64px !important;
+  }
+
+  .mat-mdc-list-item {
+    &.active {
+      background-color: rgba(37, 99, 235, 0.1) !important;
+      color: var(--primary-color) !important;
+
+      .mat-icon {
+        color: var(--primary-color) !important;
+      }
+    }
+  }
+
+  .mdc-list-item__primary-text {
+    font-weight: 500;
+  }
+}
+
+.menu-icon {
+  font-size: 18px;
+  line-height: 1;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}

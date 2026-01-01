@@ -1,0 +1,12 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ms-meteo
+  config:
+    import: optional:configserver:http://localhost:8071
+  cloud:
+    config:
+      uri: http://localhost:8071
+      fail-fast: true

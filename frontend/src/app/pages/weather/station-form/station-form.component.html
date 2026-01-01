@@ -1,0 +1,47 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode ? 'Edit Weather Station' : 'Create New Weather Station' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field class="full-width">
+          <mat-label>Station Name</mat-label>
+          <input matInput formControlName="nom" placeholder="e.g., Weather Station North">
+          <mat-error *ngIf="nom?.hasError('required')">Name is required</mat-error>
+          <mat-error *ngIf="nom?.hasError('minlength')">Name must be at least 3 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Latitude</mat-label>
+          <input matInput formControlName="latitude" placeholder="e.g., 33.5731" type="number" step="0.0001">
+          <mat-error *ngIf="latitude?.hasError('required')">Latitude is required</mat-error>
+          <mat-error *ngIf="latitude?.hasError('pattern')">Invalid latitude format</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Longitude</mat-label>
+          <input matInput formControlName="longitude" placeholder="e.g., -7.5898" type="number" step="0.0001">
+          <mat-error *ngIf="longitude?.hasError('required')">Longitude is required</mat-error>
+          <mat-error *ngIf="longitude?.hasError('pattern')">Invalid longitude format</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Provider</mat-label>
+          <input matInput formControlName="fournisseur" placeholder="e.g., Météo France">
+          <mat-error *ngIf="fournisseur?.hasError('required')">Provider is required</mat-error>
+          <mat-error *ngIf="fournisseur?.hasError('minlength')">Provider must be at least 2 characters</mat-error>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting || !form.valid">
+            <mat-spinner *ngIf="submitting" diameter="20" class="spinner"></mat-spinner>
+            {{ isEditMode ? 'Update' : 'Create' }} Station
+          </button>
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

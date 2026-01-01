@@ -1,0 +1,99 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven'
+    
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+    
+    - name: Run tests with coverage
+      run: |
+        for service in authentification ms-meteo ms-arrosage gateway-service eureka-server config-server; do
+          if [ -d "$service" ]; then
+            echo "Testing $service..."
+            cd $service
+            mvn clean test jacoco:report
+            cd ..
+          fi
+        done
+    
+    - name: SonarCloud Scan
+      if: github.event_name == 'push'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        for service in authentification ms-meteo ms-arrosage gateway-service; do
+          if [ -d "$service" ]; then
+            cd $service
+            mvn sonar:sonar \
+              -Dsonar.projectKey=wassimdgh_Micro-Services_${service} \
+              -Dsonar.organization=wassimdgh \
+              -Dsonar.host.url=https://sonarcloud.io
+            cd ..
+          fi
+        done
+      continue-on-error: true
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+
+  frontend-quality:
+    name: Frontend Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Lint
+      working-directory: ./frontend
+      run: npm run lint --if-present
+      continue-on-error: true
+    
+    - name: Run tests
+      working-directory: ./frontend
+      run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+      continue-on-error: true

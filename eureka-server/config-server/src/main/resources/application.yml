@@ -1,0 +1,41 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://gitlab.com/wassimdaghfous3/microservice.git
+          username: oauth2
+          password: glpat-1Ulk3CX4yawxfaMbOmtMpm86MQp1OmdqMzZkCw.01.120sdet8b
+          default-label: main
+          clone-on-start: true
+          timeout: 10
+          skip-ssl-validation: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8070/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.boot: INFO

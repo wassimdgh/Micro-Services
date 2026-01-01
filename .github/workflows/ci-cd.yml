@@ -1,0 +1,279 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: wassimdgh
+
+jobs:
+  # Job 1: Build and Test Backend Services
+  build-backend:
+    name: Build & Test Microservices
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: 
+          - authentification
+          - ms-meteo
+          - ms-arrosage
+          - gateway-service
+          - eureka-server
+          - config-server
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven'
+    
+    - name: Build with Maven
+      working-directory: ./${{ matrix.service }}
+      run: |
+        mvn clean install -DskipTests
+        mvn test
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.service }}-jar
+        path: ./${{ matrix.service }}/target/*.jar
+        retention-days: 1
+
+  # Job 2: Build and Test Frontend
+  build-frontend:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Lint
+      working-directory: ./frontend
+      run: npm run lint --if-present
+      continue-on-error: true
+    
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build:prod
+    
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-dist
+        path: ./frontend/dist
+        retention-days: 1
+
+  # Job 3: Build Docker Images
+  build-docker-images:
+    name: Build Docker Images
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service: 
+          - authentification
+          - ms-meteo
+          - ms-arrosage
+          - gateway-service
+          - eureka-server
+          - config-server
+          - frontend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Download artifact (Backend)
+      if: matrix.service != 'frontend'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ matrix.service }}-jar
+        path: ./${{ matrix.service }}/target
+    
+    - name: Download artifact (Frontend)
+      if: matrix.service == 'frontend'
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-dist
+        path: ./frontend/dist
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./${{ matrix.service }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Job 4: Security Scan
+  security-scan:
+    name: Security Scanning
+    needs: [build-docker-images]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Job 5: Deploy to Kubernetes (Staging)
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [build-docker-images, security-scan]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.irrigation-system.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+    
+    - name: Configure kubectl
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > ~/.kube/config
+    
+    - name: Update image tags in manifests
+      run: |
+        for service in authentification ms-meteo ms-arrosage gateway-service eureka-server config-server frontend; do
+          if [ -f "k8s/*-${service}.yaml" ]; then
+            sed -i "s|image: .*/${service}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${service}:main-${{ github.sha }}|g" k8s/*-${service}.yaml
+          fi
+        done
+    
+    - name: Apply Kubernetes manifests
+      run: |
+        kubectl apply -f k8s/00-namespace.yaml
+        kubectl apply -f k8s/01-configmap.yaml
+        kubectl apply -f k8s/02-secret.yaml
+        kubectl apply -f k8s/03-pvc.yaml
+        kubectl apply -f k8s/04-mysql.yaml
+        kubectl apply -f k8s/05-rabbitmq.yaml
+        kubectl apply -f k8s/06-config-server.yaml
+        kubectl apply -f k8s/07-eureka-server.yaml
+        kubectl apply -f k8s/08-gateway-service.yaml
+        kubectl apply -f k8s/09-ms-meteo.yaml
+        kubectl apply -f k8s/10-ms-arrosage.yaml
+        kubectl apply -f k8s/11-frontend.yaml
+        kubectl apply -f k8s/12-ingress.yaml
+    
+    - name: Wait for deployment
+      run: |
+        kubectl wait --for=condition=ready pod --all -n irrigation-system --timeout=300s
+    
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n irrigation-system
+        kubectl get services -n irrigation-system
+
+  # Job 6: Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://irrigation-system.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+    
+    - name: Configure kubectl
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > ~/.kube/config
+    
+    - name: Update image tags in manifests
+      run: |
+        for service in authentification ms-meteo ms-arrosage gateway-service eureka-server config-server frontend; do
+          if [ -f "k8s/*-${service}.yaml" ]; then
+            sed -i "s|image: .*/${service}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${service}:main-${{ github.sha }}|g" k8s/*-${service}.yaml
+          fi
+        done
+    
+    - name: Deploy to production
+      run: |
+        kubectl apply -f k8s/
+    
+    - name: Wait for deployment
+      run: |
+        kubectl wait --for=condition=ready pod --all -n irrigation-system --timeout=300s
+    
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n irrigation-system
+        kubectl get services -n irrigation-system
+    
+    - name: Notify deployment
+      if: success()
+      run: |
+        echo "✅ Production deployment successful!"
+        echo "Deployed SHA: ${{ github.sha }}"

@@ -1,0 +1,13 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: authentification
+  config:
+    import: optional:configserver:http://localhost:8071
+  cloud:
+    config:
+      uri: http://localhost:8071
+      fail-fast: true
+ 

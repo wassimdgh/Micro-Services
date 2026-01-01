@@ -1,0 +1,78 @@
+spring:
+  rabbitmq:
+    enabled: true
+    host: campbell.lmq.cloudamqp.com
+    port: 5671
+    username: tqiiuomc
+    password: fTCuXSqEk4TX6wQ7dUeOvVo59XTwl98w
+    virtual-host: tqiiuomc
+    ssl:
+      enabled: true
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/arrosage_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      client:
+        config:
+          meteo-client:
+            connectTimeout: 5000
+            readTimeout: 10000
+  scheduling:
+    enabled: true
+    thread-name-prefix: arrosage-scheduler-
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-details: always
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8070/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+# Irrigation messaging configuration
+irrigation:
+  exchange: irrigation.exchange
+  routing-key: weather.key
+  queue: arrosage.queue
+
+# Weather-based Auto-Planning Configuration
+app:
+  weather:
+    station-ids: 1,2,3
+  scheduling:
+    irrigation:
+      # Initial delay before first auto-adjust (2 minutes)
+      initial-delay: 120000
+      # Interval between adjustments (4 hours)
+      fixed-delay: 14400000
+
+# Logging configuration
+logging:
+  level:
+    com.example: DEBUG
+    org.springframework.web: INFO
+    org.springframework.cloud.openfeign: DEBUG
+    org.hibernate.SQL: DEBUG

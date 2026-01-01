@@ -1,0 +1,103 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>📊 Dashboard</h1>
+    <p class="subtitle">Welcome to your Irrigation Management System</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="dashboard-grid">
+    <div class="stat-card weather-stations" routerLink="/weather/stations">
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-icon">🌍</div>
+          <div class="stat-content">
+            <p class="stat-label">Weather<br>Stations</p>
+            <p class="stat-number">{{ stationCount }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="stat-card forecasts" routerLink="/weather/forecasts">
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-icon">⛅</div>
+          <div class="stat-content">
+            <p class="stat-label">Forecasts</p>
+            <p class="stat-number">{{ forecastCount }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="stat-card schedules" routerLink="/irrigation/schedules">
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-content">
+            <p class="stat-label">Schedules</p>
+            <p class="stat-number">{{ scheduleCount }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="stat-card logs" routerLink="/irrigation/logs">
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-icon">📋</div>
+          <div class="stat-content">
+            <p class="stat-label">Logs</p>
+            <p class="stat-number">{{ logCount }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- System Status -->
+  <mat-card class="info-card">
+    <mat-card-header>
+      <mat-card-title>🔍 System Status</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-label">Eureka Server</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 8070</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">API Gateway</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 9000</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Weather Service</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 8081</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Irrigation Service</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 8082</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Authentication Service</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 8085</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Database</span>
+          <span class="status-value active">✓ Connected</span>
+          <span class="status-detail">MySQL (XAMPP)</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Frontend</span>
+          <span class="status-value active">✓ Running</span>
+          <span class="status-detail">Port: 4200</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

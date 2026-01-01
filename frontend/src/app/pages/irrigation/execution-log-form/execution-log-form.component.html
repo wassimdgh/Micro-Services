@@ -1,0 +1,45 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Create New Execution Log</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field class="full-width">
+          <mat-label>Irrigation Schedule</mat-label>
+          <mat-select formControlName="programmeId">
+            <mat-option *ngFor="let programme of programmes" [value]="programme.id">
+              Parcel {{ programme.parcelleId }} - {{ programme.datePlanifiee | date: 'short' }}
+            </mat-option>
+          </mat-select>
+          <mat-error>Schedule is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Execution Date & Time</mat-label>
+          <input matInput formControlName="dateExecution" type="datetime-local">
+          <mat-error>Date and time are required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Actual Volume (Liters)</mat-label>
+          <input matInput formControlName="volumeReel" type="number" placeholder="e.g., 95.5">
+          <mat-error>Valid volume is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Remarks</mat-label>
+          <textarea matInput formControlName="remarque" placeholder="Optional remarks about the execution"></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting || !form.valid">
+            Create Log Entry
+          </button>
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

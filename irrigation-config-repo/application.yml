@@ -1,0 +1,39 @@
+# Common configuration for all microservices
+# This file is loaded by all services that connect to the config server
+
+spring:
+  cloud:
+    config:
+      enabled: true
+      fail-fast: false
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,refresh
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    refresh:
+      enabled: true
+
+# Common Eureka settings
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    prefer-ip-address: true
+  client:
+    registry-fetch-interval-seconds: 30
+    initial-instance-info-replication-interval-seconds: 40
+
+# Common logging settings
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO

@@ -1,0 +1,59 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode ? 'Edit Irrigation Schedule' : 'Create New Irrigation Schedule' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field class="full-width">
+          <mat-label>Parcel ID</mat-label>
+          <input matInput formControlName="parcelleId" type="number" placeholder="e.g., 101">
+          <mat-error>Valid parcel ID is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Planned Date</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="scheduledDate" placeholder="Click to select date" readonly>
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+          <mat-error>Date is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Planned Time</mat-label>
+          <input matInput formControlName="scheduledTime" type="time" placeholder="HH:MM">
+          <mat-error>Time is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Duration (minutes)</mat-label>
+          <input matInput formControlName="duree" type="number" placeholder="e.g., 30">
+          <mat-error>Valid duration is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Expected Volume (Liters)</mat-label>
+          <input matInput formControlName="volumePrevu" type="number" placeholder="e.g., 100">
+          <mat-error>Valid volume is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="statut">
+            <mat-option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting || !form.valid">
+            {{ isEditMode ? 'Update' : 'Create' }} Schedule
+          </button>
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

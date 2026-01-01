@@ -1,0 +1,92 @@
+<div class="container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>Irrigation Schedules (Auto-Adjusted)</mat-card-title>
+      <button mat-raised-button color="primary" (click)="createNew()" class="create-btn" title="Add Schedule">
+        ➕ Add Schedule
+      </button>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-card class="info-card">
+    <mat-card-content>
+      <p class="info-text">
+        💧 <strong>Smart Scheduling:</strong> Schedules are automatically adjusted every 4 hours based on weather forecasts.
+        Rain reduces water volume, heavy rain postpones irrigation, and high temperatures increase water needs.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="loading" class="loading-card">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </mat-card>
+
+  <mat-card *ngIf="!loading" class="table-card">
+    <div class="table-container">
+      <table mat-table [dataSource]="schedules" class="schedules-table">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="parcelleId">
+          <th mat-header-cell *matHeaderCellDef>Parcel ID</th>
+          <td mat-cell *matCellDef="let element">{{ element.parcelleId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="datePlanifiee">
+          <th mat-header-cell *matHeaderCellDef>Planned Date</th>
+          <td mat-cell *matCellDef="let element">{{ element.datePlanifiee | date: 'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="duree">
+          <th mat-header-cell *matHeaderCellDef>Duration (min)</th>
+          <td mat-cell *matCellDef="let element">{{ element.duree }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="volumePrevu">
+          <th mat-header-cell *matHeaderCellDef>Expected Volume (L)</th>
+          <td mat-cell *matCellDef="let element">{{ element.volumePrevu }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="statut">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <span [ngClass]="getStatusBackgroundClass(element.statut)" class="status-badge">
+              {{ element.statut }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="adjustment">
+          <th mat-header-cell *matHeaderCellDef>Auto-Adjustment</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="adjustment-info">{{ getAdjustmentInfo(element) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let element" class="actions-cell">
+            <button mat-icon-button color="primary" (click)="edit(element)" title="Edit Schedule" class="action-btn">
+              <span class="action-emoji">📝</span>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(element)" title="Delete Schedule" class="action-btn">
+              <span class="action-emoji">❌</span>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <div *ngIf="schedules.length === 0" class="no-data">
+      <p>No irrigation schedules found.</p>
+      <button mat-raised-button color="primary" (click)="createNew()">
+        Create First Schedule
+      </button>
+    </div>
+  </mat-card>
+</div>
