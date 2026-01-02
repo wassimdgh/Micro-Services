@@ -129,7 +129,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.service }}-jar
-        path: ./${{ matrix.service }}/target
+        path: ./${{ matrix.service }}/target/
     
     - name: Download artifact (Frontend)
       if: matrix.service == 'frontend'
